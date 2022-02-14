@@ -12,6 +12,7 @@ int main(int argc, char *argv[]){
     if(argc != 2)
         return -5;
 
+    // kontrola argumentu
     char *end;
     int portInt = (int)strtol(argv[1], &end, 10);
     if(*end != '\0') return -4;
@@ -20,6 +21,7 @@ int main(int argc, char *argv[]){
 
     uint16_t port = (uint16_t)portInt;
 
+    // pocatecni zisk hodnot
     char hostName[MAX_LEN];
     char cpuName[MAX_LEN];
     char cpuLoad[MAX_LEN];
@@ -30,12 +32,14 @@ int main(int argc, char *argv[]){
     if(!getCpuName(cpuName, MAX_LEN)) return -2;
     if(!getCpuLoad(cpuLoad, MAX_LEN)) return -2;
 
+    // vypis hodnot do terminalu serveru
     printf("-------Server Info-------\n");
     printf("Port: %d\n", port);
     printf("Host name: %s\n", hostName);
     printf("CPU name: %s\n", cpuName);
     printf("CPU load: %s\n", cpuLoad);
 
+    // nastaveni pripojeni serveru
     int server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     int opt = 1;
     if(server == 0) return -3;
@@ -50,13 +54,14 @@ int main(int argc, char *argv[]){
     if(bind(server, (struct sockaddr *)&address, sizeof(address)) < 0) return -3;
     if(listen(server, 5) < 0) return -3;
 
+    // nastaveni odpovedi pro klienty
     int newSocket, readSize;
     char message[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain;\r\n\r\n";
     char error[] = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain;\r\n\r\n";
     char output[strlen(message) + MAX_LEN];
     memset(output, 0, strlen(message) + MAX_LEN);
     int addrLen = sizeof(address);
-    int order = 1;
+    int order = 1;  // cislovani pozadavku od klientu
     while (true){
         newSocket = accept(server, (struct sockaddr *)&address, (socklen_t*)&addrLen);
         if (newSocket < 0) return -1;
